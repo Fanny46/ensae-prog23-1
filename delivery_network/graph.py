@@ -80,9 +80,15 @@ class Graph:
                 if power >= k_power and not nodes_v[k]:
                     nodes_v[k]=True
                     return parcours(k, chemin+[k])
+                if i == self.graph[node][-1] and chemin[-1] != src :
+                    nodes_v[i[0]]=True
+                    chemin.pop()
+                    k = chemin[-1]
+                    return parcours(k, chemin)
             return None
         
         return parcours(src, [src])
+
 
     def connected_components(self):
         l=[] #listes vides qui contiendra les listes de composants connectés
@@ -112,38 +118,21 @@ class Graph:
         return set(map(frozenset, self.connected_components()))
     
     def min_power(self, src, dest):
-        dict_graph = {n : {self.graph[n][v][0] : self.graph[n][v][1] for v in range(len(self.graph[n]))} for n in self.nodes}
-            
-        from collections import deque
-        def dijkstraAlgo(graph, src):
-            queue = deque([src])
-            power = {src: 0}
-            power_min = 0
-            while queue:
-                t = queue.popleft()
-                for voisin in graph[t]:
-                        queue.append(voisin)
-                        if(voisin not in power or power_min > power[voisin]):
-                            power[voisin] = power_min
-            return power[dest]
+        a = 0
+        b = 1
+
+        def dicho(a, b) :
+            while b - a > 0.1 :
+                if self.get_path_with_power(src, dest, (a+b)/2) != None:
+                    b = (a+b)/2
+                else :
+                    a = (a+b)/2
+                dicho(a, b)
+            return self.get_path_with_power(src, dest, b), b
         
-        return dijkstraAlgo(dict_graph, src)
-
-
-
-        def parcours(node, chemin, power_min) :
-            if node == dest:
-                return chemin, power_min
-            for i in self.graph[node] :
-                k=i[0]
-                k_power = i[1]
-                if not nodes_v[k]:
-                    nodes_v[k]=True
-                    if k_power>power_min : power_min = k_power
-                    return parcours(k, chemin+[k], power_min)
-            return None
-        
-        return parcours(src, [src], 0)
+        while self.get_path_with_power(src, dest, b) == None :
+            b = 2*b
+        return dicho(a,b)
 
 
 
@@ -185,4 +174,4 @@ def graph_from_file(filename):
     return G
 
 g = graph_from_file("input/network.02.in")
-print(g.min_power(1, 2))
+print(g.get_path_with_power(1,2,11))

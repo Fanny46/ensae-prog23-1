@@ -1,4 +1,8 @@
 # This will work if ran from the root folder.
+import tracemalloc
+tracemalloc.start()
+
+
 import sys 
 sys.path.append("delivery_network")
 
